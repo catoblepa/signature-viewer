@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Signature Viewer
+Name[it]=Visualizzatore firme
+GenericName=Digital Signature Verifier
+GenericName[it]=Verificatore di firma digitale
+Comment=Verify digital signatures (PAdES/CAdES)
+Comment[it]=Verifica firme digitali (PAdES/CAdES)
+Exec=signature-viewer %F
+Icon=io.github.catoblepa.signature-viewer
+Terminal=false
+Categories=Office;
+Keywords=signature;firma;pades;cades;p7m;pdf;verify;verifica;
+StartupNotify=true
+MimeType=application/pdf;application/pkcs7-signature;application/x-pkcs7-mime;application/x-pkcs7-certificates;
+X-GNOME-UsesNotifications=true

@@ -1,0 +1,39 @@
+[project]
+name = "signature-viewer"
+version = "0.1.19"
+description = "Verifica di firme digitali PAdES/CAdES con anteprima della posizione delle firme (GTK4/Adwaita)"
+requires-python = ">=3.10"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "Davide Truffa", email = "davide@catoblepa.org" }]
+keywords = ["pades", "cades", "signature", "p7m", "pdf", "gtk4", "adwaita", "gnome"]
+dependencies = [
+    "pygobject",
+    "asn1crypto>=1.5.1",
+    "pypdf",
+    "pyHanko>=0.36.0",
+    "pyhanko-certvalidator",
+    "requests",
+    "python-pkcs11>=0.9.3",
+    "blueprint-compiler",
+]
+
+[project.gui-scripts]
+signature-viewer = "signature_viewer.app:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    "signature_viewer",
+    "signature_viewer.core",
+    "signature_viewer.ui",
+    "signature_viewer.ui.blueprints",
+    "signature_viewer.ui.widgets",
+    "signature_viewer.ui.dialogs",
+    "signature_viewer.util",
+]
+
+[tool.setuptools.package-data]
+"signature_viewer.ui" = ["blueprints/*.blp"]

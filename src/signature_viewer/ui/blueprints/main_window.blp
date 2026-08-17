@@ -1,0 +1,174 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.ToolbarView main_toolbar {
+  [top]
+  Adw.HeaderBar {
+    [start]
+    Gtk.Button btn_open {
+      icon-name: "document-open-symbolic";
+      tooltip-text: _("Open document");
+      action-name: "app.open";
+    }
+
+    [end]
+    Gtk.MenuButton menu_button {
+      icon-name: "open-menu-symbolic";
+      tooltip-text: _("Menu");
+    }
+
+    [end]
+    Gtk.Button btn_open_extracted {
+      tooltip-text: _("Open original document");
+      sensitive: false;
+      css-classes: ["suggested-action"];
+      Gtk.Box {
+        orientation: horizontal;
+        spacing: 6;
+        Gtk.Image btn_open_extracted_icon {
+          icon-name: "document-open-symbolic";
+        }
+        Gtk.Label btn_open_extracted_label {
+          label: _("Open original document");
+        }
+      }
+    }
+  }
+
+  content: Gtk.Stack stack_main {
+    transition-type: crossfade;
+
+    Adw.StatusPage empty_state {
+      icon-name: "document-send-symbolic";
+      title: _("Signature Viewer");
+      description: _("Open a signed file (.p7m, .pdf) to verify its digital signatures");
+    }
+
+    Gtk.Box document_view {
+      orientation: vertical;
+      spacing: 12;
+      margin-top: 16;
+      margin-bottom: 16;
+      margin-start: 16;
+      margin-end: 16;
+
+      Gtk.Box header_row {
+        orientation: horizontal;
+        spacing: 12;
+
+        Gtk.Image file_icon {
+          icon-name: "text-x-generic-symbolic";
+          pixel-size: 48;
+        }
+
+        Gtk.Box header_text {
+          orientation: vertical;
+          spacing: 2;
+
+          Gtk.Label file_name {
+            css-classes: ["title-2"];
+            halign: start;
+            wrap: true;
+          }
+
+          Gtk.Label file_meta {
+            css-classes: ["dim-label"];
+            halign: start;
+            wrap: true;
+          }
+        }
+      }
+
+      Gtk.Label verify_status {
+        halign: start;
+        wrap: true;
+        css-classes: ["status-info"];
+      }
+
+      Gtk.Box body_box {
+        orientation: horizontal;
+        spacing: 12;
+        vexpand: true;
+
+        Gtk.Box left_box {
+          orientation: vertical;
+          spacing: 8;
+          hexpand: true;
+          vexpand: true;
+
+          Gtk.Label sigs_title {
+            label: _("Signatures");
+            halign: start;
+            css-classes: ["heading"];
+          }
+
+          Gtk.ScrolledWindow sigs_scroll {
+            hexpand: true;
+            vexpand: true;
+
+            Gtk.ListBox verify_list {
+              selection-mode: single;
+              css-classes: ["boxed-list"];
+              hexpand: true;
+            }
+          }
+        }
+
+        Gtk.Box pdf_panel {
+          orientation: vertical;
+          spacing: 8;
+          vexpand: true;
+          visible: false;
+
+          Gtk.Box pdf_toolbar {
+            orientation: horizontal;
+            spacing: 8;
+            hexpand: true;
+
+            Gtk.Box {
+              orientation: horizontal;
+              spacing: 4;
+              halign: start;
+
+              Gtk.Button btn_pdf_prev {
+                icon-name: "go-previous-symbolic";
+                tooltip-text: _("Previous page");
+              }
+
+              Gtk.Label lbl_pdf_page {
+                label: "1 / 1";
+              }
+
+              Gtk.Button btn_pdf_next {
+                icon-name: "go-next-symbolic";
+                tooltip-text: _("Next page");
+              }
+            }
+
+            Gtk.Box {
+              orientation: horizontal;
+              spacing: 4;
+              halign: end;
+              hexpand: true;
+
+              Gtk.Button btn_zoom_out {
+                icon-name: "zoom-out-symbolic";
+                tooltip-text: _("Zoom out");
+              }
+
+              Gtk.Button btn_zoom_in {
+                icon-name: "zoom-in-symbolic";
+                tooltip-text: _("Zoom in");
+              }
+            }
+          }
+
+          Gtk.ScrolledWindow pdf_scroll {
+            hexpand: true;
+            vexpand: true;
+          }
+        }
+      }
+    }
+  };
+}

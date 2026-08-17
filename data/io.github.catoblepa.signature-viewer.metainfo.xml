@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.catoblepa.signature-viewer</id>
+  <name>Signature Viewer</name>
+  <summary>Verify digital signatures (PAdES/CAdES)</summary>
+  <developer id="https://github.com/catoblepa">
+    <name>Davide Truffa</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>Signature Viewer is a GNOME application to open digitally signed files and verify the contained digital signatures.</p>
+    <p>It supports:</p>
+    <ul>
+      <li>.p7m (CAdES) files, including nested and multiple signatures</li>
+      <li>.pdf (PAdES) files, with an in-app preview showing where each signature was applied</li>
+      <li>Full signer details: name, tax code, organization, certificate validity, signing time</li>
+      <li>Trust chain validation using the system trust store and the European Trusted Service List (TSL)</li>
+      <li>Extraction and preview of the original document contained in a CAdES envelope</li>
+    </ul>
+  </description>
+  <categories>
+    <category>Office</category>
+    <category>Utility</category>
+  </categories>
+  <keywords>
+    <keyword>signature</keyword>
+    <keyword>firma</keyword>
+    <keyword>pades</keyword>
+    <keyword>cades</keyword>
+    <keyword>p7m</keyword>
+    <keyword>pdf</keyword>
+    <keyword>verify</keyword>
+    <keyword>verifica</keyword>
+  </keywords>
+  <provides>
+    <binary>signature-viewer</binary>
+    <mimetype>application/pdf</mimetype>
+    <mimetype>application/pkcs7-signature</mimetype>
+    <mimetype>application/x-pkcs7-mime</mimetype>
+  </provides>
+  <launchable type="desktop-id">io.github.catoblepa.signature-viewer.desktop</launchable>
+  <url type="homepage">https://github.com/catoblepa</url>
+  <releases>
+    <release version="0.1.19" date="2026-08-17">
+      <description>
+        <p>Make diagnostic save/open logging opt-in via SIGNATURE_VIEWER_DEBUG.</p>
+      </description>
+    </release>
+    <release version="0.1.18" date="2026-08-17">
+      <description>
+        <p>Use the LibreOffice Flatpak fallback when sandbox MIME associations are unavailable.</p>
+      </description>
+    </release>
+    <release version="0.1.17" date="2026-08-17">
+      <description>
+        <p>Open saved documents through the host handler without document portal paths.</p>
+      </description>
+    </release>
+    <release version="0.1.16" date="2026-08-17">
+      <description>
+        <p>Diagnostic logging for the save/open document flow.</p>
+      </description>
+    </release>
+    <release version="0.1.15" date="2026-08-17">
+      <description>
+        <p>Use the real shared path when saving and opening extracted documents.</p>
+      </description>
+    </release>
+    <release version="0.1.14" date="2026-08-17">
+      <description>
+        <p>Show the "Open" button on the save confirmation toast.</p>
+      </description>
+    </release>
+    <release version="0.1.13" date="2026-08-17">
+      <description>
+        <p>Add an "Open" action to the save confirmation toast.</p>
+      </description>
+    </release>
+    <release version="0.1.12" date="2026-08-17">
+      <description>
+        <p>Smaller startup window that expands when the PDF preview is shown.</p>
+      </description>
+    </release>
+    <release version="0.1.11" date="2026-08-17">
+      <description>
+        <p>Correct shortcut label and a noticeably smaller startup window.</p>
+      </description>
+    </release>
+    <release version="0.1.10" date="2026-08-17">
+      <description>
+        <p>Compact startup window, wider layout for the PAdES preview, and a cleaner preview toolbar.</p>
+      </description>
+    </release>
+    <release version="0.1.9" date="2026-08-17">
+      <description>
+        <p>Detect PDF content inside CAdES envelopes, accent-styled action button and keyboard shortcuts.</p>
+      </description>
+    </release>
+    <release version="0.1.8" date="2026-08-17">
+      <description>
+        <p>UI string cleanup.</p>
+      </description>
+    </release>
+    <release version="0.1.7" date="2026-08-17">
+      <description>
+        <p>Simplified original document handling: open it for PDF files, save it for CAdES envelopes.</p>
+      </description>
+    </release>
+    <release version="0.1.6" date="2026-08-17">
+      <description>
+        <p>Open CSV and spreadsheet documents explicitly in LibreOffice Calc.</p>
+      </description>
+    </release>
+    <release version="0.1.5" date="2026-08-17">
+      <description>
+        <p>Launch Flatpak document handlers with explicit access to the shared download folder.</p>
+      </description>
+    </release>
+    <release version="0.1.4" date="2026-08-17">
+      <description>
+        <p>Open extracted CAdES documents directly through the host file opener in Flatpak.</p>
+      </description>
+    </release>
+    <release version="0.1.3" date="2026-08-17">
+      <description>
+        <p>Open generated documents through their file URI without exposing document-portal paths to external applications.</p>
+      </description>
+    </release>
+    <release version="0.1.2" date="2026-08-17">
+      <description>
+        <p>Fix opening extracted office and CSV documents from the Flatpak sandbox.</p>
+      </description>
+    </release>
+    <release version="0.1.1" date="2026-08-17">
+      <description>
+        <p>Robust handling of the "Open original document" action in sandboxed environments.</p>
+      </description>
+    </release>
+    <release version="0.1.0" date="2026-08-17">
+      <description>
+        <p>Initial release: CAdES/PAdES verification with in-app signature position preview.</p>
+      </description>
+    </release>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

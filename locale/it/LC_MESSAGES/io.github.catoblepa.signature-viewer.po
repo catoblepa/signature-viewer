@@ -1,0 +1,219 @@
+# Italian translations for Signature Viewer.
+# Copyright (C) 2026 Davide Truffa <davide@catoblepa.org>
+# This file is distributed under the same license as the Signature Viewer package.
+# Davide Truffa <davide@catoblepa.org>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: signature-viewer 0.1.19\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-17 00:00+0200\n"
+"PO-Revision-Date: 2026-08-17 00:00+0200\n"
+"Last-Translator: Davide Truffa <davide@catoblepa.org>\n"
+"Language-Team: Italian\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Signature Viewer"
+msgstr "Visualizzatore firme"
+
+msgid "Open document"
+msgstr "Apri documento"
+
+msgid "Menu"
+msgstr "Menu"
+
+msgid "Open a signed file (.p7m, .pdf) to verify its digital signatures"
+msgstr "Apri un file firmato (.p7m, .pdf) per verificarne le firme digitali"
+
+msgid "Open original document"
+msgstr "Apri documento originale"
+
+msgid "Save original document"
+msgstr "Salva documento originale"
+
+msgid "Signatures"
+msgstr "Firme"
+
+msgid "Previous page"
+msgstr "Pagina precedente"
+
+msgid "Next page"
+msgstr "Pagina successiva"
+
+msgid "Zoom out"
+msgstr "Riduci zoom"
+
+msgid "Zoom in"
+msgstr "Ingrandisci"
+
+msgid "File not accessible"
+msgstr "File non accessibile"
+
+msgid "Update certificates (TSL)"
+msgstr "Aggiorna certificati (TSL)"
+
+msgid "Keyboard Shortcuts"
+msgstr "Scorciatoie da tastiera"
+
+msgid "General"
+msgstr "Generale"
+
+msgid "Close window"
+msgstr "Chiudi la finestra"
+
+msgid "About"
+msgstr "Informazioni"
+
+msgid "Quit"
+msgstr "Esci"
+
+msgid "Updating certificates…"
+msgstr "Aggiornamento certificati…"
+
+msgid "Certificate update failed"
+msgstr "Aggiornamento certificati non riuscito"
+
+msgid "Certificates updated"
+msgstr "Certificati aggiornati"
+
+msgid "Verification of digital signatures (PAdES/CAdES) with in-app preview"
+msgstr "Verifica delle firme digitali (PAdES/CAdES) con anteprima integrata"
+
+msgid "Icons"
+msgstr "Icone"
+
+msgid "Signed files (.p7m, .pdf)"
+msgstr "File firmati (.p7m, .pdf)"
+
+msgid "All files"
+msgstr "Tutti i file"
+
+msgid "PDF document"
+msgstr "Documento PDF"
+
+msgid "File"
+msgstr "File"
+
+msgid "Verifying…"
+msgstr "Verifica in corso…"
+
+msgid "Verification error"
+msgstr "Errore di verifica"
+
+msgid "Unknown signer"
+msgstr "Firmatario sconosciuto"
+
+msgid "Valid"
+msgstr "Valida"
+
+msgid "Invalid"
+msgstr "Non valida"
+
+msgid "Trusted"
+msgstr "Fidata"
+
+msgid "Not trusted"
+msgstr "Non fidata"
+
+msgid "Verification summary"
+msgstr "Riepilogo verifica"
+
+msgid "Signature field"
+msgstr "Campo firma"
+
+msgid "Page"
+msgstr "Pagina"
+
+msgid "Signature"
+msgstr "Firma"
+
+msgid "PDF preview unavailable"
+msgstr "Anteprima PDF non disponibile"
+
+msgid "Error saving file"
+msgstr "Errore nel salvataggio del file"
+
+msgid "File saved successfully"
+msgstr "File salvato correttamente"
+
+msgid "_Apri"
+msgstr "_Apri"
+
+msgid "File opening error"
+msgstr "Errore di apertura del file"
+
+msgid "PAdES signature"
+msgstr "Firma PAdES"
+
+msgid "No digital signature found in file"
+msgstr "Nessuna firma digitale trovata nel file"
+
+msgid "Verification completed successfully"
+msgstr "Verifica completata con successo"
+
+msgid "The signature is not valid: the document may have been modified"
+msgstr "La firma non è valida: il documento potrebbe essere stato modificato"
+
+msgid "Signature valid, but the certificate chain is not trusted"
+msgstr "Firma valida, ma la catena di certificati non è fidata"
+
+msgid "Identity"
+msgstr "Identità"
+
+msgid "Tax Code"
+msgstr "Codice fiscale"
+
+msgid "Organization"
+msgstr "Organizzazione"
+
+msgid "Certificate issued by"
+msgstr "Certificato rilasciato da"
+
+msgid "Reason"
+msgstr "Motivo"
+
+msgid "Location"
+msgstr "Luogo"
+
+msgid "Not present"
+msgstr "Non presente"
+
+msgid "Valid from"
+msgstr "Valido dal"
+
+msgid "Valid until"
+msgstr "Valido fino al"
+
+msgid "Certificate status"
+msgstr "Stato del certificato"
+
+msgid "Expired"
+msgstr "Scaduto"
+
+msgid "Not yet valid"
+msgstr "Non ancora valido"
+
+msgid "Error"
+msgstr "Errore"
+
+msgid "Certificate not found for this signature."
+msgstr "Certificato non trovato per questa firma."
+
+msgid "Signature date and time"
+msgstr "Data e ora della firma"
+
+msgid "Signature valid at signing time"
+msgstr "Firma valida al momento della sottoscrizione"
+
+msgid "Yes"
+msgstr "Sì"
+
+msgid "No"
+msgstr "No"
+
+msgid "certificate not valid at signature date"
+msgstr "certificato non valido alla data della firma"
