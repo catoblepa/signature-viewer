@@ -1,42 +1,42 @@
-name: Build Flatpak
+name: Flatpak
 
 on:
   push:
-    branches: [ main ]
-    tags:
-      - 'v*'
-  pull_request:
-
-permissions:
-  contents: write
+    tags: ["v*"]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
+    permissions:
+      contents: write
 
-      - name: Install Flatpak and flatpak-builder
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50
+      options: --privileged
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           manifest-path: io.github.catoblepa.signature-viewer.json
           bundle: io.github.catoblepa.signature-viewer.flatpak
+          cache: true
+          cache-key: flatpak-builder-${{ hashFiles('io.github.catoblepa.signature-viewer.json') }}
+          upload-artifact: false
 
-      - name: Upload Flatpak bundle as artifact
-        uses: actions/upload-artifact@v5
+      - name: Upload bundle as artifact
+        uses: actions/upload-artifact@v7
         with:
-          name: signature-viewer-flatpak
+          name: io.github.catoblepa.signature-viewer.flatpak
           path: io.github.catoblepa.signature-viewer.flatpak
+          if-no-files-found: error
 
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v2
+      - name: Publish to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
         with:
           files: io.github.catoblepa.signature-viewer.flatpak
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
