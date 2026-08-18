@@ -89,6 +89,7 @@ class SignerReport:
     page: Optional[int] = None
     box: Optional[Tuple[float, float, float, float]] = None
     field_name: str = ""
+    revoked: bool = False
 
 
 @dataclass
@@ -139,14 +140,30 @@ def _report_no_signatures(file_format: str) -> VerificationReport:
     )
 
 
+def _revocation_info_from_status(status) -> tuple[bool, dict]:
+    """Return ``(revoked, info_dict)`` from a pyhanko signature status."""
+    revoked = bool(getattr(status, "revoked", False))
+    info = {}
+    if revoked:
+        status_value = f"✗ {_('Revoked')}"
+        details = getattr(status, "revocation_details", None)
+        if details is not None:
+            rev_date = getattr(details, "revocation_date", None)
+            if rev_date is not None:
+                status_value += f" · {rev_date.strftime('%d/%m/%Y %H:%M:%S')}"
+        info[_("Certificate status")] = status_value
+    return revoked, info
+
+
 def _untrusted_message(signers: List[SignerReport]) -> str:
     """Choose a clear message when signatures are intact but not trusted.
 
-    ``valid_untrusted`` covers two distinct situations: an untrusted
-    certificate chain (unknown CA) or a certificate that is no longer valid
-    (expired / not yet valid). Pick the most informative wording based on the
-    certificate status already computed for the signers.
+    ``valid_untrusted`` covers several situations: a revoked certificate, an
+    untrusted certificate chain (unknown CA) or a certificate that is no longer
+    valid (expired / not yet valid). Pick the most informative wording, giving
+    priority to the most severe cause.
     """
+    revoked = any(s.revoked for s in signers)
     expired = False
     not_yet_valid = False
     status_key = _("Certificate status")
@@ -156,6 +173,8 @@ def _untrusted_message(signers: List[SignerReport]) -> str:
             expired = True
         elif _("Not yet valid") in cert_status:
             not_yet_valid = True
+    if revoked:
+        return _("The signature is intact, but the certificate has been revoked")
     if expired:
         return _(
             "The signature is intact, but the certificate is expired"
@@ -193,12 +212,14 @@ async def verify_cades(
 
     signer_infos = display.analizza_busta(data_der)
     summary = status.summary()
+    revoked, rev_info = _revocation_info_from_status(status)
     signers = [
         SignerReport(
-            info=info,
+            info={**info, **rev_info},
             valid=status.valid,
             trusted=status.trusted,
             summary=summary,
+            revoked=revoked,
         )
         for info in signer_infos
     ]
@@ -290,6 +311,8 @@ async def verify_pades(
             info[_("Certificate issued by")] = (
                 status.signing_cert.issuer.human_friendly
             )
+        revoked, rev_info = _revocation_info_from_status(status)
+        info.update(rev_info)
         debug.debug(f"PAdES: signer #{i} validated: {status.summary()}")
 
         page = None
@@ -346,6 +369,7 @@ async def verify_pades(
                 page=page,
                 box=box,
                 field_name=field_name,
+                revoked=revoked,
             )
         )
 

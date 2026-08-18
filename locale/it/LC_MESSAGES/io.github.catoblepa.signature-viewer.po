@@ -122,12 +122,6 @@ msgstr "Non fidata"
 msgid "Verification summary"
 msgstr "Riepilogo verifica"
 
-msgid "Signature field"
-msgstr "Campo firma"
-
-msgid "Page"
-msgstr "Pagina"
-
 msgid "Signature"
 msgstr "Firma"
 
@@ -205,6 +199,12 @@ msgstr "Scaduto"
 
 msgid "Not yet valid"
 msgstr "Non ancora valido"
+
+msgid "Revoked"
+msgstr "Revocato"
+
+msgid "The signature is intact, but the certificate has been revoked"
+msgstr "La firma è integra, ma il certificato è stato revocato"
 
 msgid "Error"
 msgstr "Errore"

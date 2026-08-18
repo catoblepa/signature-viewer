@@ -416,8 +416,43 @@ class SignaturesWindow(Adw.ApplicationWindow):
         expander.set_subtitle(self._signer_subtitle(signer))
         expander.add_prefix(badge)
 
+        SKIP_KEYS = ("tipo_firma", "firmatario_idx", "livello_busta", _("Identity"))
+        # Related fields rendered on a single row to keep the details compact.
+        PAIRS = (
+            (_("Tax Code"), _("Organization")),
+            (_("Reason"), _("Location")),
+            (_("Valid from"), _("Valid until")),
+        )
+        paired = {key for pair in PAIRS for key in pair}
+
+        def _add_pair_row(key1, key2):
+            v1 = info.get(key1)
+            v2 = info.get(key2)
+            if v1 is not None and v2 is not None:
+                row = Adw.ActionRow()
+                row.set_title(f"{key1}: {v1}")
+                row.set_subtitle(f"{key2}: {v2}")
+                row.set_selectable(False)
+                expander.add_row(row)
+            elif v1 is not None:
+                row = Adw.ActionRow()
+                row.set_title(str(key1))
+                row.set_subtitle(str(v1))
+                row.set_selectable(False)
+                expander.add_row(row)
+            elif v2 is not None:
+                row = Adw.ActionRow()
+                row.set_title(str(key2))
+                row.set_subtitle(str(v2))
+                row.set_selectable(False)
+                expander.add_row(row)
+
+        # Identity-related fields on top, then the rest, then the validity dates.
+        _add_pair_row(*PAIRS[0])
+        _add_pair_row(*PAIRS[1])
+
         for key, value in info.items():
-            if key in ("tipo_firma", "firmatario_idx", "livello_busta"):
+            if key in SKIP_KEYS or key in paired:
                 continue
             row = Adw.ActionRow()
             row.set_title(str(key))
@@ -425,19 +460,12 @@ class SignaturesWindow(Adw.ApplicationWindow):
             row.set_selectable(False)
             expander.add_row(row)
 
-        if signer.summary:
+        _add_pair_row(*PAIRS[2])
+
+        if _DEBUG and signer.summary:
             row = Adw.ActionRow()
             row.set_title(_("Verification summary"))
             row.set_subtitle(signer.summary)
-            row.set_selectable(False)
-            expander.add_row(row)
-
-        if signer.page is not None:
-            row = Adw.ActionRow()
-            row.set_title(_("Signature field"))
-            row.set_subtitle(
-                signer.field_name or f"{_('Page')} {signer.page + 1}"
-            )
             row.set_selectable(False)
             expander.add_row(row)
 
