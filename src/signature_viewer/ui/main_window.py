@@ -13,6 +13,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
+from signature_viewer.util import debug
 from signature_viewer.util.i18n import APP_ID, _
 
 for _name in ("pyhanko", "pyhanko_certvalidator"):
@@ -20,9 +21,7 @@ for _name in ("pyhanko", "pyhanko_certvalidator"):
 
 BLUEPRINTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "blueprints")
 APP_ICON_NAME = "io.github.catoblepa.signature-viewer"
-_DEBUG = os.environ.get("SIGNATURE_VIEWER_DEBUG", "").lower() in {
-    "1", "true", "yes", "on"
-}
+_DEBUG = debug.enabled()
 
 
 def _debug(message):

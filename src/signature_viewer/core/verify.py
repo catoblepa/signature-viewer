@@ -25,6 +25,7 @@ from pyhanko_certvalidator import ValidationContext
 from pyhanko_certvalidator.registry import SimpleCertificateStore
 
 from signature_viewer.core import display, trust
+from signature_viewer.util import debug
 from signature_viewer.util.i18n import _
 
 _logger = logging.getLogger(__name__)
@@ -161,24 +162,51 @@ async def verify_pades(
         validation_context = build_validation_context()
 
     try:
-        reader = PdfFileReader(io.BytesIO(pdf_bytes))
+        # strict=False: some signed PDFs use a hybrid-reference xref table
+        # (a classic xref table trailer with a /XRefStm pointing at an xref
+        # stream). pyhanko refuses to validate those in strict mode, so we
+        # open them leniently; the parallel pypdf extraction already tolerates
+        # them.
+        reader = PdfFileReader(io.BytesIO(pdf_bytes), strict=False)
         embedded = list(collect_embedded_signatures(reader))
     except Exception as exc:
+        debug.debug(f"PAdES: cannot read PDF: {exc}")
         return _report_error("PAdES", exc)
 
     if not embedded:
         return _report_no_signatures("PAdES")
 
     pdf_signatures = display.estrai_firme_da_pdf(pdf_bytes)
+    debug.debug(f"PAdES: found {len(embedded)} embedded signature(s), "
+                f"{len(pdf_signatures)} pypdf-extracted signature(s)")
     signers: List[SignerReport] = []
 
-    for embedded_sig in embedded:
+    for i, embedded_sig in enumerate(embedded):
         try:
             status = await async_validate_pdf_signature(
                 embedded_sig, signer_validation_context=validation_context
             )
         except Exception as exc:
-            return _report_error("PAdES", exc)
+            # Report a per-signer failure instead of aborting the whole
+            # verification, so other signatures can still be shown.
+            debug.debug(f"PAdES: signer #{i} failed to validate: {exc}")
+            sig_field = getattr(embedded_sig, "sig_field", None)
+            field_name = ""
+            if sig_field is not None:
+                try:
+                    field_name = str(sig_field.get("/T") or "")
+                except Exception:
+                    pass
+            signers.append(
+                SignerReport(
+                    info={_("Error"): f"{_('Verification error')}: {exc}"},
+                    valid=False,
+                    trusted=False,
+                    summary="ERROR",
+                    field_name=field_name,
+                )
+            )
+            continue
 
         info = {}
         if status.signing_cert is not None:
@@ -189,6 +217,7 @@ async def verify_pades(
             info[_("Certificate issued by")] = (
                 status.signing_cert.issuer.human_friendly
             )
+        debug.debug(f"PAdES: signer #{i} validated: {status.summary()}")
 
         page = None
         box = None

@@ -15,6 +15,7 @@ from datetime import datetime
 
 from asn1crypto import cms
 
+from signature_viewer.util import debug
 from signature_viewer.util.i18n import _
 
 
@@ -258,5 +259,6 @@ def estrai_firme_da_pdf(pdf_data):
                 )
 
         return signatures
-    except Exception:
+    except Exception as exc:
+        debug.debug(f"PAdES extraction failed: {exc}")
         return []
