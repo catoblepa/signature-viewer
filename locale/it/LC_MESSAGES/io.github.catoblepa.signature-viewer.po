@@ -161,6 +161,15 @@ msgstr "La firma non è valida: il documento potrebbe essere stato modificato"
 msgid "Signature valid, but the certificate chain is not trusted"
 msgstr "Firma valida, ma la catena di certificati non è fidata"
 
+msgid "The signature is intact, but the certificate is expired"
+msgstr "La firma è integra, ma il certificato è scaduto"
+
+msgid "The signature is intact, but the certificate is not yet valid"
+msgstr "La firma è integra, ma il certificato non è ancora valido"
+
+msgid "The signature is intact, but the certificate chain is not trusted"
+msgstr "La firma è integra, ma la catena di certificati non è fidata"
+
 msgid "Identity"
 msgstr "Identità"
 

@@ -94,6 +94,34 @@ def _report_no_signatures(file_format: str) -> VerificationReport:
     )
 
 
+def _untrusted_message(signers: List[SignerReport]) -> str:
+    """Choose a clear message when signatures are intact but not trusted.
+
+    ``valid_untrusted`` covers two distinct situations: an untrusted
+    certificate chain (unknown CA) or a certificate that is no longer valid
+    (expired / not yet valid). Pick the most informative wording based on the
+    certificate status already computed for the signers.
+    """
+    expired = False
+    not_yet_valid = False
+    status_key = _("Certificate status")
+    for signer in signers:
+        cert_status = signer.info.get(status_key, "")
+        if _("Expired") in cert_status:
+            expired = True
+        elif _("Not yet valid") in cert_status:
+            not_yet_valid = True
+    if expired:
+        return _(
+            "The signature is intact, but the certificate is expired"
+        )
+    if not_yet_valid:
+        return _(
+            "The signature is intact, but the certificate is not yet valid"
+        )
+    return _("The signature is intact, but the certificate chain is not trusted")
+
+
 async def verify_cades(
     data: bytes, validation_context: Optional[ValidationContext] = None
 ) -> VerificationReport:
@@ -149,7 +177,7 @@ async def verify_cades(
     return VerificationReport(
         file_format="CAdES",
         status="valid_untrusted",
-        message=_("Signature valid, but the certificate chain is not trusted"),
+        message=_untrusted_message(signers),
         signers=signers,
     )
 
@@ -283,7 +311,7 @@ async def verify_pades(
         message = _("The signature is not valid: the document may have been modified")
         status_key = "invalid"
     else:
-        message = _("Signature valid, but the certificate chain is not trusted")
+        message = _untrusted_message(signers)
         status_key = "valid_untrusted"
 
     return VerificationReport(
