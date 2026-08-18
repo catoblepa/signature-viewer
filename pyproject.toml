@@ -1,6 +1,6 @@
 [project]
 name = "signature-viewer"
-version = "0.1.20"
+version = "0.1.21"
 description = "Verifica di firme digitali PAdES/CAdES con anteprima della posizione delle firme (GTK4/Adwaita)"
 requires-python = ">=3.10"
 license = { text = "GPL-3.0-or-later" }

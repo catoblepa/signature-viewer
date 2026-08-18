@@ -42,6 +42,11 @@
   <launchable type="desktop-id">io.github.catoblepa.signature-viewer.desktop</launchable>
   <url type="homepage">https://github.com/catoblepa</url>
   <releases>
+    <release version="0.1.21" date="2026-08-18">
+      <description>
+        <p>Cache the trust validation context and render the PDF preview off-thread for faster opening, detect revoked certificates with a dedicated message and revocation date, and compact the per-signer details.</p>
+      </description>
+    </release>
     <release version="0.1.20" date="2026-08-18">
       <description>
         <p>Support hybrid-reference signed PDFs and clarify the message shown when a signature is intact but its certificate is expired.</p>
