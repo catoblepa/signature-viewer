@@ -138,7 +138,6 @@ class SignaturesWindow(Adw.ApplicationWindow):
         self.stack_main = builder.get_object("stack_main")
         self.empty_state = builder.get_object("empty_state")
         self.document_view = builder.get_object("document_view")
-        self.file_icon = builder.get_object("file_icon")
         self.file_name = builder.get_object("file_name")
         self.file_meta = builder.get_object("file_meta")
         self.verify_status = builder.get_object("verify_status")
@@ -233,14 +232,15 @@ class SignaturesWindow(Adw.ApplicationWindow):
 
         about = Adw.AboutWindow(transient_for=self)
         about.set_application_name(_("Signature Viewer"))
-        about.set_icon_name(APP_ICON_NAME)
-        about.set_version(__version__)
         about.set_developer_name("Davide Truffa")
-        about.set_license_type(Gtk.License.GPL_3_0)
+        about.set_version(__version__)
+        about.set_copyright("Copyright © 2026 Davide Truffa")
         about.set_comments(
             _("Verification of digital signatures (PAdES/CAdES) with in-app preview")
         )
-        about.add_credit_section("Icons", ["Andrej Koelewijn"])
+        about.set_website("https://github.com/catoblepa/signature-viewer")
+        about.set_license_type(Gtk.License.GPL_3_0)
+        about.set_application_icon(APP_ICON_NAME)
         about.present()
 
     # --- document ---
@@ -304,10 +304,6 @@ class SignaturesWindow(Adw.ApplicationWindow):
         except OSError:
             size = 0
         kind = _detect_file_kind(path)
-
-        self.file_icon.set_from_icon_name(
-            "x-office-document-symbolic" if self.current_is_pdf else "text-x-generic-symbolic"
-        )
         self.file_name.set_text(name)
         self.file_meta.set_text(f"{kind} · {_human_size(size)}")
 

@@ -12,5 +12,5 @@ Terminal=false
 Categories=Office;
 Keywords=signature;firma;pades;cades;p7m;pdf;verify;verifica;
 StartupNotify=true
-MimeType=application/pdf;application/pkcs7-signature;application/x-pkcs7-mime;application/x-pkcs7-certificates;
+MimeType=application/pdf;application/pkcs7-signature;application/x-pkcs7-mime;application/pkcs7-mime;application/x-pkcs7-certificates;
 X-GNOME-UsesNotifications=true

@@ -21,7 +21,6 @@ install-data:
 	install -d $(PREFIX)/share/signature-viewer/ui
 	python3 -c "import sys; from pathlib import Path; sys.path.insert(0, '$(PREFIX)/lib/signature-viewer'); from blueprintcompiler.main import BlueprintApp; [Path('$(PREFIX)/share/signature-viewer/ui', p.stem + '.ui').write_text(BlueprintApp()._compile(p.read_text())[0]) for p in Path('src/signature_viewer/ui/blueprints').glob('*.blp')]"
 	install -Dm644 data/icons/hicolor/scalable/apps/$(APP_ID).svg $(PREFIX)/share/icons/hicolor/scalable/apps/$(APP_ID).svg
-	install -Dm644 data/icons/hicolor/scalable/mimetypes/application-pkcs7-mime.svg $(PREFIX)/share/icons/hicolor/scalable/mimetypes/application-pkcs7-mime.svg
 	install -Dm644 data/$(APP_ID).desktop $(PREFIX)/share/applications/$(APP_ID).desktop
 	install -Dm644 data/$(APP_ID).metainfo.xml $(PREFIX)/share/metainfo/$(APP_ID).metainfo.xml
 

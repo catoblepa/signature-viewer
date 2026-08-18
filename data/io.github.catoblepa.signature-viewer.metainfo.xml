@@ -37,11 +37,17 @@
     <binary>signature-viewer</binary>
     <mimetype>application/pdf</mimetype>
     <mimetype>application/pkcs7-signature</mimetype>
+    <mimetype>application/pkcs7-mime</mimetype>
     <mimetype>application/x-pkcs7-mime</mimetype>
   </provides>
   <launchable type="desktop-id">io.github.catoblepa.signature-viewer.desktop</launchable>
   <url type="homepage">https://github.com/catoblepa</url>
   <releases>
+    <release version="0.1.22" date="2026-08-19">
+      <description>
+        <p>Fix the About dialog version showing 0.0.0 by reading it from the installed AppStream metainfo, show the app icon in the About window, drop the mimetype icon, and register the application/pkcs7-mime mimetype for AlmaLinux/RHEL compatibility.</p>
+      </description>
+    </release>
     <release version="0.1.21" date="2026-08-18">
       <description>
         <p>Cache the trust validation context and render the PDF preview off-thread for faster opening, detect revoked certificates with a dedicated message and revocation date, and compact the per-signer details.</p>
