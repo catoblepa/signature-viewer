@@ -220,9 +220,12 @@ class SignaturesWindow(Adw.ApplicationWindow):
         threading.Thread(target=work, daemon=True).start()
 
     def _on_tsl_refresh_done(self, roots):
+        from signature_viewer.core.verify import invalidate_validation_context
+
         if roots is None:
             self._show_toast(f"⚠ {_('Certificate update failed')}")
         else:
+            invalidate_validation_context()
             self._show_toast(f"✓ {_('Certificates updated')}: {len(roots)}")
 
     def show_about(self):
@@ -321,6 +324,7 @@ class SignaturesWindow(Adw.ApplicationWindow):
     def _clear_pdf_preview(self):
         self.pdf_panel.set_visible(False)
         if self._pdf_preview is not None:
+            self._pdf_preview.close()
             self.pdf_scroll.set_child(None)
             self._pdf_preview = None
 

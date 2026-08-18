@@ -227,11 +227,36 @@ def load_tsl_roots() -> List[x509.Certificate]:
     return cached or []
 
 
+def load_tsl_roots_cached() -> List[x509.Certificate]:
+    """Anchors from the TSL cache without blocking on a network refresh.
+
+    Used on the verification path so that opening a document never waits on a
+    TSL download; the background/startup refresh keeps the cache up to date.
+    """
+    cached = _read_tsl_cache()
+    return cached or []
+
+
 def load_trust_roots() -> List[x509.Certificate]:
     """Overall trust anchors: system + TSL (deduplicated)."""
     roots = load_system_trust_roots()
     seen = {cert.issuer_serial for cert in roots}
     for cert in load_tsl_roots():
+        if cert.issuer_serial not in seen:
+            seen.add(cert.issuer_serial)
+            roots.append(cert)
+    return roots
+
+
+def load_trust_roots_cached() -> List[x509.Certificate]:
+    """Trust anchors using only the cached TSL, without network access.
+
+    Preferred on the verification path so opening a document never blocks on a
+    TSL download; the background refresh updates the cache in the meantime.
+    """
+    roots = load_system_trust_roots()
+    seen = {cert.issuer_serial for cert in roots}
+    for cert in load_tsl_roots_cached():
         if cert.issuer_serial not in seen:
             seen.add(cert.issuer_serial)
             roots.append(cert)

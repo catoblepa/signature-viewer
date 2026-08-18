@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import io
 import logging
+import threading
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Tuple
 
 from asn1crypto import cms, x509
@@ -33,6 +35,47 @@ _logger = logging.getLogger(__name__)
 # re-export for compatibility
 load_system_trust_roots = trust.load_system_trust_roots
 load_trust_roots = trust.load_trust_roots
+
+# Session-wide cache of the validation context. Building it loads the system
+# trust anchors and registers hundreds of TSL certificates, which costs on the
+# order of half a second and was previously repeated on every document open.
+_context_lock = threading.Lock()
+_cached_context: Optional[ValidationContext] = None
+_cached_at: Optional[datetime] = None
+_CONTEXT_MAX_AGE = timedelta(days=7)
+
+
+def _context_is_fresh() -> bool:
+    return (
+        _cached_at is not None
+        and datetime.now(timezone.utc) - _cached_at < _CONTEXT_MAX_AGE
+    )
+
+
+def get_validation_context() -> ValidationContext:
+    """Return the cached validation context, rebuilding it when stale.
+
+    The context is built lazily on first use and reused for subsequent
+    verifications, so opening many documents only pays the trust-store setup
+    cost once. Call :func:`invalidate_validation_context` after a TSL refresh
+    to force a rebuild.
+    """
+    global _cached_context, _cached_at
+    with _context_lock:
+        if _cached_context is not None and _context_is_fresh():
+            return _cached_context
+        context = build_validation_context()
+        _cached_context = context
+        _cached_at = datetime.now(timezone.utc)
+        return context
+
+
+def invalidate_validation_context() -> None:
+    """Discard the cached validation context so it is rebuilt on next use."""
+    global _cached_context, _cached_at
+    with _context_lock:
+        _cached_context = None
+        _cached_at = None
 
 
 @dataclass
@@ -70,7 +113,9 @@ def build_validation_context(
     (revocation check, soft-fail).
     """
     if trust_roots is None:
-        trust_roots = trust.load_trust_roots()
+        # Use the cached TSL so building the context never blocks on a network
+        # download; the background/startup refresh updates the cache in time.
+        trust_roots = trust.load_trust_roots_cached()
     store = SimpleCertificateStore()
     for cert in trust_roots:
         store.register(cert)
@@ -127,7 +172,7 @@ async def verify_cades(
 ) -> VerificationReport:
     """Verify a CAdES envelope (DER/PEM/Base64)."""
     if validation_context is None:
-        validation_context = build_validation_context()
+        validation_context = get_validation_context()
 
     _formato, data_der = display.rileva_formato_p7m(data)
 
@@ -187,7 +232,7 @@ async def verify_pades(
 ) -> VerificationReport:
     """Verify the PAdES signatures of a PDF."""
     if validation_context is None:
-        validation_context = build_validation_context()
+        validation_context = get_validation_context()
 
     try:
         # strict=False: some signed PDFs use a hybrid-reference xref table
