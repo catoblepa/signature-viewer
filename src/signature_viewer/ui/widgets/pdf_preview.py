@@ -198,12 +198,6 @@ class PdfPreview(Gtk.DrawingArea):
             cr.rectangle(sx0, sy0, width, height)
             cr.stroke()
 
-            cr.set_source_rgba(0, 0, 0, 0.9)
-            cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-            cr.set_font_size(11)
-            cr.move_to(sx0 + 4, sy0 - 5)
-            cr.show_text(sig["label"])
-
     # --- interaction ---
 
     def _on_pressed(self, _gesture, _n_press, x, y):
