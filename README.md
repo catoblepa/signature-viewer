@@ -42,6 +42,15 @@ You can also pass a file directly:
 python3 main.py document.p7m
 ```
 
+## Tests
+
+```bash
+make test
+```
+
+The CAdES tests generate their fixtures with the OpenSSL CLI and are skipped
+when it is not available.
+
 ## Install
 
 ```bash

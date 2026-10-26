@@ -476,6 +476,8 @@ class SignaturesWindow(Adw.ApplicationWindow):
             ("✓ " if signer.trusted else "⚠ ")
             + (_("Trusted") if signer.trusted else _("Not trusted"))
         )
+        if signer.level > 1:
+            parts.append(_("Nested signature (level %d)") % signer.level)
         return " · ".join(parts)
 
     def _estrai_contenuto_innermost(self, raw: bytes):

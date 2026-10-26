@@ -152,6 +152,12 @@ msgstr "Verifica completata con successo"
 msgid "The signature is not valid: the document may have been modified"
 msgstr "La firma non è valida: il documento potrebbe essere stato modificato"
 
+msgid "Not all signatures are valid (%(invalid)d of %(total)d)"
+msgstr "Non tutte le firme sono valide (%(invalid)d su %(total)d)"
+
+msgid "Nested signature (level %d)"
+msgstr "Firma annidata (livello %d)"
+
 msgid "Signature valid, but the certificate chain is not trusted"
 msgstr "Firma valida, ma la catena di certificati non è fidata"
 

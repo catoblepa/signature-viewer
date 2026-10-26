@@ -61,6 +61,27 @@ def cerca_certificato_per_serial(cert_list, serial):
     return None
 
 
+def cerca_certificato_per_sid(signer, cert_list):
+    """Find the signer's certificate using the CMS ``SignerIdentifier``.
+
+    CMS allows either ``issuerAndSerialNumber`` or ``subjectKeyIdentifier``;
+    both are used in the wild (OpenSSL uses the latter with ``-keyid``).
+    """
+    sid = signer["sid"]
+    if sid.name == "issuer_and_serial_number":
+        serial = sid.chosen["serial_number"].native
+        return cerca_certificato_per_serial(cert_list, serial)
+    if sid.name == "subject_key_identifier":
+        key_id = sid.chosen.native
+        for cert in cert_list:
+            try:
+                if cert.key_identifier == key_id:
+                    return cert
+            except Exception:
+                continue
+    return None
+
+
 def estrai_nome_cognome(subject):
     cn = subject.native.get("common_name", "")
     gn = subject.native.get("given_name", "")
@@ -89,11 +110,7 @@ def estrai_organization(subject):
 def mostra_info_firma(signer, cert_list):
     """Return the signer information as a dictionary."""
     info = {}
-    sid = signer["sid"]
-    serial = None
-    if sid.name == "issuer_and_serial_number":
-        serial = sid.chosen["serial_number"].native
-    cert = cerca_certificato_per_serial(cert_list, serial)
+    cert = cerca_certificato_per_sid(signer, cert_list)
     not_before = not_after = None
     if cert:
         subject = cert.subject
@@ -149,33 +166,63 @@ def mostra_info_firma(signer, cert_list):
     return info
 
 
+# Hard cap on the envelope nesting depth. Sequential CAdES signatures nest one
+# SignedData per signature; the limit only guards against malformed or
+# deliberately pathological input.
+_MAX_NESTING = 32
+
+
+def iter_livelli_busta(data, livello=1):
+    """Iterate over the ``SignedData`` levels of a (possibly nested) CAdES file.
+
+    Yields ``(livello, signed_data, certificati)`` tuples, outermost envelope
+    first. Sequential signatures are usually wrapped in an envelope whose
+    ``eContentType`` is ``data`` and whose content is the previous envelope's
+    DER bytes, so the content is parsed as CMS regardless of the declared
+    content type.
+    """
+    if livello == 1:
+        _formato, data = rileva_formato_p7m(data)
+
+    try:
+        content_info = cms.ContentInfo.load(data)
+    except Exception:
+        return
+    if content_info["content_type"].native != "signed_data":
+        return
+
+    signed_data = content_info["content"]
+    yield livello, signed_data, estrai_certificati(signed_data)
+
+    if livello >= _MAX_NESTING:
+        return
+    encap_content = signed_data["encap_content_info"]["content"]
+    if encap_content is None:
+        return
+    content = encap_content.native
+    if not content:
+        return
+    try:
+        inner = cms.ContentInfo.load(content)
+    except Exception:
+        return
+    if inner["content_type"].native != "signed_data":
+        return
+    yield from iter_livelli_busta(content, livello + 1)
+
+
 def analizza_busta(data, livello=1):
     """Analyze a CAdES envelope (including nested) and return signer info."""
     risultati = []
 
-    if livello == 1:
-        _formato, data_convertita = rileva_formato_p7m(data)
-        data = data_convertita
+    for livello_busta, signed_data, cert_list in iter_livelli_busta(data, livello):
+        for idx, signer in enumerate(signed_data["signer_infos"], 1):
+            info_firma = mostra_info_firma(signer, cert_list)
+            info_firma["tipo_firma"] = "CAdES"
+            info_firma["firmatario_idx"] = idx
+            info_firma["livello_busta"] = livello_busta
+            risultati.append(info_firma)
 
-    try:
-        content_info = cms.ContentInfo.load(data)
-        if content_info["content_type"].native == "signed_data":
-            signed_data = content_info["content"]
-            cert_list = estrai_certificati(signed_data)
-            for idx, signer in enumerate(signed_data["signer_infos"], 1):
-                info_firma = mostra_info_firma(signer, cert_list)
-                info_firma["tipo_firma"] = "CAdES"
-                info_firma["firmatario_idx"] = idx
-                info_firma["livello_busta"] = livello
-                risultati.append(info_firma)
-            encap_content = signed_data["encap_content_info"]["content"]
-            if encap_content is not None:
-                try:
-                    risultati += analizza_busta(encap_content.native, livello + 1)
-                except Exception:
-                    pass
-    except Exception:
-        pass
     return risultati
 
 

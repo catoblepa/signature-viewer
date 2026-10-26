@@ -90,6 +90,7 @@ class SignerReport:
     box: Optional[Tuple[float, float, float, float]] = None
     field_name: str = ""
     revoked: bool = False
+    level: int = 1
 
 
 @dataclass
@@ -186,10 +187,103 @@ def _untrusted_message(signers: List[SignerReport]) -> str:
     return _("The signature is intact, but the certificate chain is not trusted")
 
 
+def _invalid_message(signers: List[SignerReport]) -> str:
+    """Choose a clear message when one or more signatures are not valid."""
+    if len(signers) == 1:
+        return _("The signature is not valid: the document may have been modified")
+    invalid = sum(1 for signer in signers if not signer.valid)
+    return _("Not all signatures are valid (%(invalid)d of %(total)d)") % {
+        "invalid": invalid,
+        "total": len(signers),
+    }
+
+
+def _signed_data_for_signer(
+    signed_data: cms.SignedData, signer_info: cms.SignerInfo
+) -> cms.SignedData:
+    """Return a copy of ``signed_data`` with a single ``SignerInfo``.
+
+    pyhanko's CMS validation API handles exactly one signer at a time. A
+    parallel co-signature (multiple ``SignerInfo`` entries in the same
+    ``SignedData``) is valid CMS, so each signer is validated on its own copy.
+    """
+    single = signed_data.copy()
+    single["signer_infos"] = cms.SignerInfos([signer_info.copy()])
+    return single
+
+
+async def _validate_cades_levels(
+    data_der: bytes, validation_context: ValidationContext
+) -> Tuple[List[SignerReport], Optional[Exception], bool]:
+    """Validate every signer of every nested CAdES envelope.
+
+    Returns the per-signer reports, the first validation exception (if any) and
+    whether at least one signer could be validated at all.
+    """
+    signers: List[SignerReport] = []
+    first_error: Optional[Exception] = None
+    validated_any = False
+
+    for level, signed_data, cert_list in display.iter_livelli_busta(data_der):
+        for idx, signer_info in enumerate(signed_data["signer_infos"], 1):
+            info = display.mostra_info_firma(signer_info, cert_list)
+            info["tipo_firma"] = "CAdES"
+            info["firmatario_idx"] = idx
+            info["livello_busta"] = level
+            try:
+                status = await async_validate_cms_signature(
+                    _signed_data_for_signer(signed_data, signer_info),
+                    validation_context=validation_context,
+                )
+            except Exception as exc:
+                # Report a per-signer failure instead of aborting the whole
+                # verification, so the other signatures can still be shown.
+                if first_error is None:
+                    first_error = exc
+                debug.debug(
+                    f"CAdES: signer #{idx} (level {level}) failed to validate: {exc}"
+                )
+                info[_("Error")] = f"{_('Verification error')}: {exc}"
+                signers.append(
+                    SignerReport(
+                        info=info,
+                        valid=False,
+                        trusted=False,
+                        summary="ERROR",
+                        level=level,
+                    )
+                )
+                continue
+
+            validated_any = True
+            revoked, rev_info = _revocation_info_from_status(status)
+            info.update(rev_info)
+            # ``status.valid`` only covers the signature over the signed
+            # attributes; ``status.intact`` covers the digest of the content.
+            # A tampered document is intact=False and must not be reported as
+            # a valid signature.
+            intact = getattr(status, "intact", True)
+            debug.debug(
+                f"CAdES: signer #{idx} (level {level}) validated: {status.summary()}"
+            )
+            signers.append(
+                SignerReport(
+                    info=info,
+                    valid=status.valid and intact,
+                    trusted=status.trusted,
+                    summary=status.summary(),
+                    revoked=revoked,
+                    level=level,
+                )
+            )
+
+    return signers, first_error, validated_any
+
+
 async def verify_cades(
     data: bytes, validation_context: Optional[ValidationContext] = None
 ) -> VerificationReport:
-    """Verify a CAdES envelope (DER/PEM/Base64)."""
+    """Verify a CAdES envelope (DER/PEM/Base64), including nested envelopes."""
     if validation_context is None:
         validation_context = get_validation_context()
 
@@ -199,45 +293,37 @@ async def verify_cades(
         content_info = cms.ContentInfo.load(data_der)
         if content_info["content_type"].native != "signed_data":
             return _report_no_signatures("CAdES")
-        signed_data = content_info["content"]
     except Exception:
         return _report_no_signatures("CAdES")
 
-    try:
-        status = await async_validate_cms_signature(
-            signed_data, validation_context=validation_context
-        )
-    except Exception as exc:
-        return _report_error("CAdES", exc)
+    signers, first_error, validated_any = await _validate_cades_levels(
+        data_der, validation_context
+    )
 
-    signer_infos = display.analizza_busta(data_der)
-    summary = status.summary()
-    revoked, rev_info = _revocation_info_from_status(status)
-    signers = [
-        SignerReport(
-            info={**info, **rev_info},
-            valid=status.valid,
-            trusted=status.trusted,
-            summary=summary,
-            revoked=revoked,
+    if not signers:
+        return _report_no_signatures("CAdES")
+    if not validated_any and first_error is not None:
+        # Every signature failed to validate (e.g. missing signer certificate):
+        # surface the error, but keep the signer rows for context.
+        return VerificationReport(
+            file_format="CAdES",
+            status="error",
+            message=f"{_('Verification error')}: {first_error}",
+            signers=signers,
         )
-        for info in signer_infos
-    ]
 
-    if status.valid and status.trusted:
+    if all(s.valid for s in signers) and all(s.trusted for s in signers):
         return VerificationReport(
             file_format="CAdES",
             status="valid_trusted",
             message=_("Verification completed successfully"),
             signers=signers,
         )
-    if not status.valid:
+    if not all(s.valid for s in signers):
         return VerificationReport(
             file_format="CAdES",
             status="invalid",
-            message=_(
-                "The signature is not valid: the document may have been modified"
-            ),
+            message=_invalid_message(signers),
             signers=signers,
         )
     return VerificationReport(
@@ -246,6 +332,32 @@ async def verify_cades(
         message=_untrusted_message(signers),
         signers=signers,
     )
+
+
+def _signer_position(
+    signed_data: cms.SignedData, signer_info: cms.SignerInfo
+) -> int:
+    """Index of ``signer_info`` within ``signed_data``, or 0 if not found."""
+    target = signer_info.dump()
+    for index, candidate in enumerate(signed_data["signer_infos"]):
+        if candidate.dump() == target:
+            return index
+    return 0
+
+
+def _pades_signature_valid(status) -> bool:
+    """Overall validity of a PDF signature.
+
+    ``valid`` only covers the signature over the signed attributes and
+    ``intact`` the digest of the signed document revision; the PDF
+    modification policy and seed value constraints must hold as well.
+    """
+    if not (status.valid and getattr(status, "intact", True)):
+        return False
+    modification_ok = getattr(status, "docmdp_ok", True) or (
+        getattr(status, "modification_level", None) is None
+    )
+    return modification_ok and getattr(status, "seed_value_ok", True)
 
 
 async def verify_pades(
@@ -354,7 +466,14 @@ async def verify_pades(
             box = tuple(float(x) for x in matched["rect"]) if len(matched.get("rect", [])) == 4 else None
             parsed = display.analizza_busta(matched["pkcs7_data"])
             if parsed:
-                info = {**parsed[0], **info}
+                # A single PDF signature may carry multiple SignerInfo entries;
+                # pick the one being validated instead of always the first.
+                position = _signer_position(
+                    embedded_sig.signed_data, embedded_sig.signer_info
+                )
+                if position >= len(parsed):
+                    position = 0
+                info = {**parsed[position], **info}
             if matched.get("reason"):
                 info[_("Reason")] = matched["reason"]
             if matched.get("location"):
@@ -363,7 +482,7 @@ async def verify_pades(
         signers.append(
             SignerReport(
                 info=info,
-                valid=status.valid,
+                valid=_pades_signature_valid(status),
                 trusted=status.trusted,
                 summary=status.summary(),
                 page=page,
@@ -377,7 +496,7 @@ async def verify_pades(
         message = _("Verification completed successfully")
         status_key = "valid_trusted"
     elif not all(s.valid for s in signers):
-        message = _("The signature is not valid: the document may have been modified")
+        message = _invalid_message(signers)
         status_key = "invalid"
     else:
         message = _untrusted_message(signers)

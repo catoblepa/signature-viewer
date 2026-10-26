@@ -1,7 +1,7 @@
 PREFIX ?= /usr/local
 APP_ID = io.github.catoblepa.signature-viewer
 
-.PHONY: install install-lib install-bin install-data install-locales ui run
+.PHONY: install install-lib install-bin install-data install-locales ui run test
 
 install: install-lib install-bin install-data install-locales
 
@@ -37,3 +37,6 @@ ui:
 
 run:
 	python3 main.py
+
+test:
+	PYTHONPATH=src python3 -m unittest discover -s tests -v
