@@ -43,6 +43,11 @@
   <launchable type="desktop-id">io.github.catoblepa.signature-viewer.desktop</launchable>
   <url type="homepage">https://github.com/catoblepa</url>
   <releases>
+    <release version="0.1.23" date="2026-10-26">
+      <description>
+        <p>Verify every signer of parallel and nested CAdES envelopes, report each signature's own validity and trust, and detect tampered content by checking the document digest. Resolve signers identified by subject key identifier and add regression tests.</p>
+      </description>
+    </release>
     <release version="0.1.22" date="2026-08-19">
       <description>
         <p>Fix the About dialog version showing 0.0.0 by reading it from the installed AppStream metainfo, show the app icon in the About window, drop the mimetype icon, and register the application/pkcs7-mime mimetype for AlmaLinux/RHEL compatibility.</p>
