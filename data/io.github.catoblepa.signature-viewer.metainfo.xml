@@ -35,14 +35,19 @@
   </keywords>
   <provides>
     <binary>signature-viewer</binary>
-    <mimetype>application/pdf</mimetype>
-    <mimetype>application/pkcs7-signature</mimetype>
-    <mimetype>application/pkcs7-mime</mimetype>
-    <mimetype>application/x-pkcs7-mime</mimetype>
+    <mediatype>application/pdf</mediatype>
+    <mediatype>application/pkcs7-signature</mediatype>
+    <mediatype>application/pkcs7-mime</mediatype>
+    <mediatype>application/x-pkcs7-mime</mediatype>
   </provides>
   <launchable type="desktop-id">io.github.catoblepa.signature-viewer.desktop</launchable>
   <url type="homepage">https://github.com/catoblepa</url>
   <releases>
+    <release version="0.1.24" date="2026-11-21">
+      <description>
+        <p>Update to the GNOME 51 runtime and its Python 3.14 stack, with pyHanko 0.38.2, pypdf 7.1.1 and refreshed dependencies. Update Poppler to 26.11.0 and use the standard AppStream media type declarations.</p>
+      </description>
+    </release>
     <release version="0.1.23" date="2026-10-26">
       <description>
         <p>Verify every signer of parallel and nested CAdES envelopes, report each signature's own validity and trust, and detect tampered content by checking the document digest. Resolve signers identified by subject key identifier and add regression tests.</p>
