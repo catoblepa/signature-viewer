@@ -59,7 +59,7 @@ make install PREFIX=/usr/local   # or any writable prefix
 
 ## Flatpak build
 
-The app is packaged as a Flatpak targeting the GNOME 50 runtime:
+The app is packaged as a Flatpak targeting the GNOME 51 runtime:
 
 ```bash
 flatpak-builder --user --install --force-clean build-dir io.github.catoblepa.signature-viewer.json

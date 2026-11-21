@@ -21,8 +21,9 @@ jobs:
       contents: write
 
     container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50
-      options: --privileged
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
+      # Flatpak/OSTree cannot replace SDK deployments across overlay layers.
+      options: --privileged --mount type=volume,target=/var/lib/flatpak
 
     steps:
       - name: Checkout
