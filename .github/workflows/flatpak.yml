@@ -3,6 +3,15 @@ name: Flatpak
 on:
   push:
     tags: ["v*"]
+  pull_request:
+    paths:
+      - ".github/workflows/flatpak.yml"
+      - "Makefile"
+      - "data/**"
+      - "io.github.catoblepa.signature-viewer.json"
+      - "locale/**"
+      - "main.py"
+      - "src/**"
   workflow_dispatch:
 
 jobs:
